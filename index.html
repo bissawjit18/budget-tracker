@@ -7,12 +7,13 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 font-sans">
-  <div class="container mx-auto p-4 max-w-3xl">
+  <div class="container mx-auto p-4 max-w-4xl">
     <h1 class="text-3xl font-bold text-center mb-6">প্রতিদিনের খরচ ট্র্যাকার</h1>
 
     <!-- ফর্ম -->
     <div class="bg-white p-6 rounded-lg shadow-md mb-6">
-      <div class="grid grid-cols-1 gap-4">
+      <h2 class="text-xl font-semibold mb-4">নতুন খরচ যোগ করুন</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <input type="date" id="date" class="border p-2 rounded w-full" required>
         <input type="text" id="description" placeholder="বিবরণ (যেমন, বাজার)" class="border p-2 rounded w-full" required>
         <input type="number" id="amount" placeholder="টাকার পরিমাণ" class="border p-2 rounded w-full" required>
@@ -23,13 +24,35 @@
           <option value="বিল">বিল</option>
           <option value="অন্যান্য">অন্যান্য</option>
         </select>
-        <input type="text" id="notes" placeholder="মন্তব্য (ঐচ্ছিক)" class="border p-2 rounded w-full">
-        <button onclick="addExpense()" class="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">খরচ যোগ করুন</button>
+        <input type="text" id="notes" placeholder="মন্তব্য (ঐচ্ছিক)" class="border p-2 rounded w-full md:col-span-2">
+        <button onclick="addExpense()" class="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 md:col-span-2">খরচ যোগ করুন</button>
+      </div>
+    </div>
+
+    <!-- ফিল্টার এবং এক্সপোর্ট -->
+    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+      <h2 class="text-xl font-semibold mb-4">খরচ ফিল্টার এবং রিপোর্ট</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <input type="date" id="filterStartDate" class="border p-2 rounded w-full" placeholder="শুরুর তারিখ">
+        <input type="date" id="filterEndDate" class="border p-2 rounded w-full" placeholder="শেষের তারিখ">
+        <select id="filterCategory" class="border p-2 rounded w-full">
+          <option value="">সব ক্যাটাগরি</option>
+          <option value="খাবার">খাবার</option>
+          <option value="পরিবহন">পরিবহন</option>
+          <option value="বিনোদন">বিনোদন</option>
+          <option value="বিল">বিল</option>
+          <option value="অন্যান্য">অন্যান্য</option>
+        </select>
+      </div>
+      <div class="flex gap-4">
+        <button onclick="filterExpenses()" class="bg-green-500 text-white p-2 rounded hover:bg-green-600">ফিল্টার করুন</button>
+        <button onclick="exportToCSV()" class="bg-purple-500 text-white p-2 rounded hover:bg-purple-600">CSV এক্সপোর্ট</button>
+        <button onclick="printExpenses()" class="bg-gray-500 text-white p-2 rounded hover:bg-gray-600">প্রিন্ট করুন</button>
       </div>
     </div>
 
     <!-- খরচের টেবিল -->
-    <div class="bg-white p-6 rounded-lg shadow-md">
+    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
       <h2 class="text-xl font-semibold mb-4">খরচের তালিকা</h2>
       <table class="w-full text-left border-collapse">
         <thead>
@@ -46,10 +69,20 @@
       </table>
       <p class="mt-4 text-lg font-semibold">মোট খরচ: <span id="totalAmount">0</span> টাকা</p>
     </div>
+
+    <!-- মাসিক রিপোর্ট -->
+    <div class="bg-white p-6 rounded-lg shadow-md">
+      <h2 class="text-xl font-semibold mb-4">মাসিক রিপোর্ট</h2>
+      <div class="mb-4">
+        <input type="month" id="reportMonth" class="border p-2 rounded" onchange="generateMonthlyReport()">
+      </div>
+      <div id="monthlyReport" class="text-lg"></div>
+    </div>
   </div>
 
   <script>
     let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
+    let filteredExpenses = [...expenses];
 
     function addExpense() {
       const date = document.getElementById('date').value;
@@ -66,14 +99,18 @@
       const expense = { date, description, amount, category, notes };
       expenses.push(expense);
       localStorage.setItem('expenses', JSON.stringify(expenses));
+      filteredExpenses = [...expenses];
       renderExpenses();
       clearForm();
+      generateMonthlyReport();
     }
 
     function deleteExpense(index) {
       expenses.splice(index, 1);
       localStorage.setItem('expenses', JSON.stringify(expenses));
+      filteredExpenses = [...expenses];
       renderExpenses();
+      generateMonthlyReport();
     }
 
     function renderExpenses() {
@@ -81,7 +118,7 @@
       tableBody.innerHTML = '';
       let total = 0;
 
-      expenses.forEach((expense, index) => {
+      filteredExpenses.forEach((expense, index) => {
         total += expense.amount;
         const row = `
           <tr>
@@ -106,6 +143,80 @@
       document.getElementById('amount').value = '';
       document.getElementById('category').value = 'খাবার';
       document.getElementById('notes').value = '';
+    }
+
+    function filterExpenses() {
+      const startDate = document.getElementById('filterStartDate').value;
+      const endDate = document.getElementById('filterEndDate').value;
+      const category = document.getElementById('filterCategory').value;
+
+      filteredExpenses = expenses.filter(expense => {
+        let matches = true;
+        if (startDate && expense.date < startDate) matches = false;
+        if (endDate && expense.date > endDate) matches = false;
+        if (category && expense.category !== category) matches = false;
+        return matches;
+      });
+
+      renderExpenses();
+    }
+
+    function exportToCSV() {
+      const headers = ['তারিখ,বিবরণ,টাকা,ক্যাটাগরি,মন্তব্য'];
+      const rows = filteredExpenses.map(expense => 
+        `${expense.date},${expense.description},${expense.amount},${expense.category},${expense.notes}`
+      );
+      const csvContent = headers.concat(rows).join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'expenses.csv';
+      link.click();
+    }
+
+    function printExpenses() {
+      const printContent = document.getElementById('expenseTable').outerHTML;
+      const total = document.getElementById('totalAmount').textContent;
+      const printWindow = window.open('', '', 'height=600,width=800');
+      printWindow.document.write(`
+        <html>
+          <head><title>খরচের তালিকা</title></head>
+          <body>
+            <h2>খরচের তালিকা</h2>
+            ${printContent}
+            <p><strong>মোট খরচ: ${total} টাকা</strong></p>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.print();
+    }
+
+    function generateMonthlyReport() {
+      const reportMonth = document.getElementById('reportMonth').value;
+      if (!reportMonth) return;
+
+      const [year, month] = reportMonth.split('-');
+      const filteredByMonth = expenses.filter(expense => 
+        expense.date.startsWith(`${year}-${month}`)
+      );
+
+      let total = 0;
+      const categoryBreakdown = {};
+      filteredByMonth.forEach(expense => {
+        total += expense.amount;
+        categoryBreakdown[expense.category] = (categoryBreakdown[expense.category] || 0) + expense.amount;
+      });
+
+      let reportHTML = `<p><strong>মাস: ${year}-${month}</strong></p>`;
+      reportHTML += `<p>মোট খরচ: ${total.toFixed(2)} টাকা</p>`;
+      reportHTML += '<p><strong>ক্যাটাগরি অনুযায়ী খরচ:</strong></p><ul>';
+      for (const [category, amount] of Object.entries(categoryBreakdown)) {
+        reportHTML += `<li>${category}: ${amount.toFixed(2)} টাকা</li>`;
+      }
+      reportHTML += '</ul>';
+
+      document.getElementById('monthlyReport').innerHTML = reportHTML;
     }
 
     // পেজ লোড হলে খরচের তালিকা দেখান
