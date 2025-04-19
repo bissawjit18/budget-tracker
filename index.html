@@ -1,11 +1,115 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Budget Tracker</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>খরচ ট্র্যাকার</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    Hello
+<body class="bg-gray-100 font-sans">
+  <div class="container mx-auto p-4 max-w-3xl">
+    <h1 class="text-3xl font-bold text-center mb-6">প্রতিদিনের খরচ ট্র্যাকার</h1>
+
+    <!-- ফর্ম -->
+    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+      <div class="grid grid-cols-1 gap-4">
+        <input type="date" id="date" class="border p-2 rounded w-full" required>
+        <input type="text" id="description" placeholder="বিবরণ (যেমন, বাজার)" class="border p-2 rounded w-full" required>
+        <input type="number" id="amount" placeholder="টাকার পরিমাণ" class="border p-2 rounded w-full" required>
+        <select id="category" class="border p-2 rounded w-full">
+          <option value="খাবার">খাবার</option>
+          <option value="পরিবহন">পরিবহন</option>
+          <option value="বিনোদন">বিনোদন</option>
+          <option value="বিল">বিল</option>
+          <option value="অন্যান্য">অন্যান্য</option>
+        </select>
+        <input type="text" id="notes" placeholder="মন্তব্য (ঐচ্ছিক)" class="border p-2 rounded w-full">
+        <button onclick="addExpense()" class="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">খরচ যোগ করুন</button>
+      </div>
+    </div>
+
+    <!-- খরচের টেবিল -->
+    <div class="bg-white p-6 rounded-lg shadow-md">
+      <h2 class="text-xl font-semibold mb-4">খরচের তালিকা</h2>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-gray-200">
+            <th class="p-2 border">তারিখ</th>
+            <th class="p-2 border">বিবরণ</th>
+            <th class="p-2 border">টাকা</th>
+            <th class="p-2 border">ক্যাটাগরি</th>
+            <th class="p-2 border">মন্তব্য</th>
+            <th class="p-2 border">অ্যাকশন</th>
+          </tr>
+        </thead>
+        <tbody id="expenseTable"></tbody>
+      </table>
+      <p class="mt-4 text-lg font-semibold">মোট খরচ: <span id="totalAmount">0</span> টাকা</p>
+    </div>
+  </div>
+
+  <script>
+    let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
+
+    function addExpense() {
+      const date = document.getElementById('date').value;
+      const description = document.getElementById('description').value;
+      const amount = parseFloat(document.getElementById('amount').value);
+      const category = document.getElementById('category').value;
+      const notes = document.getElementById('notes').value;
+
+      if (!date || !description || !amount) {
+        alert('তারিখ, বিবরণ এবং টাকার পরিমাণ পূরণ করুন!');
+        return;
+      }
+
+      const expense = { date, description, amount, category, notes };
+      expenses.push(expense);
+      localStorage.setItem('expenses', JSON.stringify(expenses));
+      renderExpenses();
+      clearForm();
+    }
+
+    function deleteExpense(index) {
+      expenses.splice(index, 1);
+      localStorage.setItem('expenses', JSON.stringify(expenses));
+      renderExpenses();
+    }
+
+    function renderExpenses() {
+      const tableBody = document.getElementById('expenseTable');
+      tableBody.innerHTML = '';
+      let total = 0;
+
+      expenses.forEach((expense, index) => {
+        total += expense.amount;
+        const row = `
+          <tr>
+            <td class="p-2 border">${expense.date}</td>
+            <td class="p-2 border">${expense.description}</td>
+            <td class="p-2 border">${expense.amount}</td>
+            <td class="p-2 border">${expense.category}</td>
+            <td class="p-2 border">${expense.notes}</td>
+            <td class="p-2 border">
+              <button onclick="deleteExpense(${index})" class="text-red-500 hover:underline">মুছুন</button>
+            </td>
+          </tr>`;
+        tableBody.innerHTML += row;
+      });
+
+      document.getElementById('totalAmount').textContent = total.toFixed(2);
+    }
+
+    function clearForm() {
+      document.getElementById('date').value = '';
+      document.getElementById('description').value = '';
+      document.getElementById('amount').value = '';
+      document.getElementById('category').value = 'খাবার';
+      document.getElementById('notes').value = '';
+    }
+
+    // পেজ লোড হলে খরচের তালিকা দেখান
+    renderExpenses();
+  </script>
 </body>
 </html>
