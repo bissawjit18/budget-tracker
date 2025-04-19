@@ -5,37 +5,66 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>খরচ ট্র্যাকার</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Noto Sans Bengali', sans-serif;
+    }
+    .expense-card {
+      transition: transform 0.2s, opacity 0.2s;
+    }
+    .expense-card:hover {
+      transform: scale(1.02);
+    }
+    @media (max-width: 640px) {
+      .desktop-table {
+        display: none;
+      }
+    }
+    @media (min-width: 641px) {
+      .mobile-cards {
+        display: none;
+      }
+    }
+  </style>
 </head>
-<body class="bg-gray-100 font-sans">
-  <div class="container mx-auto p-4 max-w-4xl">
-    <h1 class="text-3xl font-bold text-center mb-6">প্রতিদিনের খরচ ট্র্যাকার</h1>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-300">
+  <div class="container mx-auto p-4 sm:p-6 max-w-4xl">
+    <!-- ডার্ক মোড টগল -->
+    <div class="flex justify-end mb-4">
+      <button id="themeToggle" class="bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 p-2 rounded-full">
+        🌙
+      </button>
+    </div>
+
+    <h1 class="text-2xl sm:text-3xl font-bold text-center mb-6">প্রতিদিনের খরচ ট্র্যাকার</h1>
 
     <!-- ফর্ম -->
-    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
-      <h2 class="text-xl font-semibold mb-4">নতুন খরচ যোগ করুন</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <input type="date" id="date" class="border p-2 rounded w-full" required>
-        <input type="text" id="description" placeholder="বিবরণ (যেমন, বাজার)" class="border p-2 rounded w-full" required>
-        <input type="number" id="amount" placeholder="টাকার পরিমাণ" class="border p-2 rounded w-full" required>
-        <select id="category" class="border p-2 rounded w-full">
+    <div class="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-md mb-6">
+      <h2 class="text-lg sm:text-xl font-semibold mb-4">নতুন খরচ যোগ করুন</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <input type="date" id="date" class="border p-2 rounded w-full bg-gray-50 dark:bg-gray-700 dark:text-gray-100" required>
+        <input type="text" id="description" placeholder="বিবরণ (যেমন, বাজার)" class="border p-2 rounded w-full bg-gray-50 dark:bg-gray-700 dark:text-gray-100" required>
+        <input type="number" id="amount" placeholder="টাকার পরিমাণ" class="border p-2 rounded w-full bg-gray-50 dark:bg-gray-700 dark:text-gray-100" required>
+        <select id="category" class="border p-2 rounded w-full bg-gray-50 dark:bg-gray-700 dark:text-gray-100">
           <option value="খাবার">খাবার</option>
           <option value="পরিবহন">পরিবহন</option>
           <option value="বিনোদন">বিনোদন</option>
           <option value="বিল">বিল</option>
           <option value="অন্যান্য">অন্যান্য</option>
         </select>
-        <input type="text" id="notes" placeholder="মন্তব্য (ঐচ্ছিক)" class="border p-2 rounded w-full md:col-span-2">
-        <button onclick="addExpense()" class="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 md:col-span-2">খরচ যোগ করুন</button>
+        <input type="text" id="notes" placeholder="মন্তব্য (ঐচ্ছিক)" class="border p-2 rounded w-full sm:col-span-2 bg-gray-50 dark:bg-gray-700 dark:text-gray-100">
+        <button onclick="addExpense()" class="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 sm:col-span-2 text-lg">খরচ যোগ করুন</button>
       </div>
     </div>
 
     <!-- ফিল্টার এবং এক্সপোর্ট -->
-    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
-      <h2 class="text-xl font-semibold mb-4">খরচ ফিল্টার এবং রিপোর্ট</h2>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-        <input type="date" id="filterStartDate" class="border p-2 rounded w-full" placeholder="শুরুর তারিখ">
-        <input type="date" id="filterEndDate" class="border p-2 rounded w-full" placeholder="শেষের তারিখ">
-        <select id="filterCategory" class="border p-2 rounded w-full">
+    <div class="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-md mb-6">
+      <h2 class="text-lg sm:text-xl font-semibold mb-4">খরচ ফিল্টার এবং রিপোর্ট</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+        <input type="date" id="filterStartDate" class="border p-2 rounded w-full bg-gray-50 dark:bg-gray-700 dark:text-gray-100" placeholder="শুরুর তারিখ">
+        <input type="date" id="filterEndDate" class="border p-2 rounded w-full bg-gray-50 dark:bg-gray-700 dark:text-gray-100" placeholder="শেষের তারিখ">
+        <select id="filterCategory" class="border p-2 rounded w-full bg-gray-50 dark:bg-gray-700 dark:text-gray-100">
           <option value="">সব ক্যাটাগরি</option>
           <option value="খাবার">খাবার</option>
           <option value="পরিবহন">পরিবহন</option>
@@ -44,45 +73,60 @@
           <option value="অন্যান্য">অন্যান্য</option>
         </select>
       </div>
-      <div class="flex gap-4">
-        <button onclick="filterExpenses()" class="bg-green-500 text-white p-2 rounded hover:bg-green-600">ফিল্টার করুন</button>
-        <button onclick="exportToCSV()" class="bg-purple-500 text-white p-2 rounded hover:bg-purple-600">CSV এক্সপোর্ট</button>
-        <button onclick="printExpenses()" class="bg-gray-500 text-white p-2 rounded hover:bg-gray-600">প্রিন্ট করুন</button>
+      <div class="flex flex-wrap gap-4">
+        <button onclick="filterExpenses()" class="bg-green-500 text-white p-2 rounded hover:bg-green-600 text-lg flex-1 min-w-[100px]">ফিল্টার করুন</button>
+        <button onclick="exportToCSV()" class="bg-purple-500 text-white p-2 rounded hover:bg-purple-600 text-lg flex-1 min-w-[100px]">CSV এক্সপোর্ট</button>
+        <button onclick="printExpenses()" class="bg-gray-500 text-white p-2 rounded hover:bg-gray-600 text-lg flex-1 min-w-[100px]">প্রিন্ট করুন</button>
       </div>
     </div>
 
-    <!-- খরচের টেবিল -->
-    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
-      <h2 class="text-xl font-semibold mb-4">খরচের তালিকা</h2>
-      <table class="w-full text-left border-collapse">
-        <thead>
-          <tr class="bg-gray-200">
-            <th class="p-2 border">তারিখ</th>
-            <th class="p-2 border">বিবরণ</th>
-            <th class="p-2 border">টাকা</th>
-            <th class="p-2 border">ক্যাটাগরি</th>
-            <th class="p-2 border">মন্তব্য</th>
-            <th class="p-2 border">অ্যাকশন</th>
-          </tr>
-        </thead>
-        <tbody id="expenseTable"></tbody>
-      </table>
+    <!-- খরচের তালিকা -->
+    <div class="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-md mb-6">
+      <h2 class="text-lg sm:text-xl font-semibold mb-4">খরচের তালিকা</h2>
+      <!-- ডেস্কটপ টেবিল -->
+      <div class="desktop-table overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-gray-200 dark:bg-gray-700">
+              <th class="p-2 border dark:border-gray-600">তারিখ</th>
+              <th class="p-2 border dark:border-gray-600">বিবরণ</th>
+              <th class="p-2 border dark:border-gray-600">টাকা</th>
+              <th class="p-2 border dark:border-gray-600">ক্যাটাগরি</th>
+              <th class="p-2 border dark:border-gray-600">মন্তব্য</th>
+              <th class="p-2 border dark:border-gray-600">অ্যাকশন</th>
+            </tr>
+          </thead>
+          <tbody id="expenseTable"></tbody>
+        </table>
+      </div>
+      <!-- মোবাইল কার্ড -->
+      <div class="mobile-cards space-y-4" id="expenseCards"></div>
       <p class="mt-4 text-lg font-semibold">মোট খরচ: <span id="totalAmount">0</span> টাকা</p>
     </div>
 
     <!-- মাসিক রিপোর্ট -->
-    <div class="bg-white p-6 rounded-lg shadow-md">
-      <h2 class="text-xl font-semibold mb-4">মাসিক রিপোর্ট</h2>
+    <div class="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-md">
+      <h2 class="text-lg sm:text-xl font-semibold mb-4">মাসিক রিপোর্ট</h2>
       <div class="mb-4">
-        <input type="month" id="reportMonth" class="border p-2 rounded" onchange="generateMonthlyReport()">
+        <input type="month" id="reportMonth" class="border p-2 rounded bg-gray-50 dark:bg-gray-700 dark:text-gray-100">
       </div>
-      <div id="monthlyReport" class="text-lg"></div>
+      <div id="monthlyReport" class="text-base sm:text-lg"></div>
     </div>
   </div>
 
   <script>
     let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
     let filteredExpenses = [...expenses];
+
+    // ডার্ক মোড টগল
+    const themeToggle = document.getElementById('themeToggle');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    if (prefersDark.matches) document.body.classList.add('dark');
+    themeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark');
+      localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+    });
+    if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark');
 
     function addExpense() {
       const date = document.getElementById('date').value;
@@ -115,23 +159,39 @@
 
     function renderExpenses() {
       const tableBody = document.getElementById('expenseTable');
+      const cardContainer = document.getElementById('expenseCards');
       tableBody.innerHTML = '';
+      cardContainer.innerHTML = '';
       let total = 0;
 
       filteredExpenses.forEach((expense, index) => {
         total += expense.amount;
+
+        // ডেস্কটপ টেবিল
         const row = `
           <tr>
-            <td class="p-2 border">${expense.date}</td>
-            <td class="p-2 border">${expense.description}</td>
-            <td class="p-2 border">${expense.amount}</td>
-            <td class="p-2 border">${expense.category}</td>
-            <td class="p-2 border">${expense.notes}</td>
-            <td class="p-2 border">
+            <td class="p-2 border dark:border-gray-600">${expense.date}</td>
+            <td class="p-2 border dark:border-gray-600">${expense.description}</td>
+            <td class="p-2 border dark:border-gray-600">${expense.amount}</td>
+            <td class="p-2 border dark:border-gray-600">${expense.category}</td>
+            <td class="p-2 border dark:border-gray-600">${expense.notes}</td>
+            <td class="p-2 border dark:border-gray-600">
               <button onclick="deleteExpense(${index})" class="text-red-500 hover:underline">মুছুন</button>
             </td>
           </tr>`;
         tableBody.innerHTML += row;
+
+        // মোবাইল কার্ড
+        const card = `
+          <div class="expense-card bg-gray-50 dark:bg-gray-700 p-4 rounded-lg shadow">
+            <p><strong>তারিখ:</strong> ${expense.date}</p>
+            <p><strong>বিবরণ:</strong> ${expense.description}</p>
+            <p><strong>টাকা:</strong> ${expense.amount}</p>
+            <p><strong>ক্যাটাগরি:</strong> ${expense.category}</p>
+            <p><strong>মন্তব্য:</strong> ${expense.notes || '-'}</p>
+            <button onclick="deleteExpense(${index})" class="text-red-500 hover:underline mt-2">মুছুন</button>
+          </div>`;
+        cardContainer.innerHTML += card;
       });
 
       document.getElementById('totalAmount').textContent = total.toFixed(2);
@@ -175,12 +235,20 @@
     }
 
     function printExpenses() {
-      const printContent = document.getElementById('expenseTable').outerHTML;
+      const printContent = document.querySelector('.desktop-table').outerHTML;
       const total = document.getElementById('totalAmount').textContent;
       const printWindow = window.open('', '', 'height=600,width=800');
       printWindow.document.write(`
         <html>
-          <head><title>খরচের তালিকা</title></head>
+          <head>
+            <title>খরচের তালিকা</title>
+            <style>
+              body { font-family: 'Noto Sans Bengali', sans-serif; }
+              table { width: 100%; border-collapse: collapse; }
+              th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+              th { background-color: #f2f2f2; }
+            </style>
+          </head>
           <body>
             <h2>খরচের তালিকা</h2>
             ${printContent}
@@ -221,6 +289,7 @@
 
     // পেজ লোড হলে খরচের তালিকা দেখান
     renderExpenses();
+    document.getElementById('reportMonth').addEventListener('change', generateMonthlyReport);
   </script>
 </body>
 </html>
