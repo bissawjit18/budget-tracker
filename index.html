@@ -26,6 +26,9 @@
         display: none;
       }
     }
+    #editModal {
+      transition: opacity 0.3s ease-in-out;
+    }
   </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-300">
@@ -112,17 +115,41 @@
       </div>
       <div id="monthlyReport" class="text-base sm:text-lg"></div>
     </div>
+
+    <!-- ইডিট মডাল -->
+    <div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+      <div class="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-md w-full max-w-lg">
+        <h2 class="text-lg sm:text-xl font-semibold mb-4">খরচ ইডিট করুন</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <input type="date" id="editDate" class="border p-2 rounded w-full bg-gray-50 dark:bg-gray-700 dark:text-gray-100" required>
+          <input type="text" id="editDescription" placeholder="বিবরণ" class="border p-2 rounded w-full bg-gray-50 dark:bg-gray-700 dark:text-gray-100" required>
+          <input type="number" id="editAmount" placeholder="টাকার পরিমাণ" class="border p-2 rounded w-full bg-gray-50 dark:bg-gray-700 dark:text-gray-100" required>
+          <select id="editCategory" class="border p-2 rounded w-full bg-gray-50 dark:bg-gray-700 dark:text-gray-100">
+            <option value="খাবার">খাবার</option>
+            <option value="পরিবহন">পরিবহন</option>
+            <option value="বিনোদন">বিনোদন</option>
+            <option value="বিল">বিল</option>
+            <option value="অন্যান্য">অন্যান্য</option>
+          </select>
+          <input type="text" id="editNotes" placeholder="মন্তব্য (ঐচ্ছিক)" class="border p-2 rounded w-full sm:col-span-2 bg-gray-50 dark:bg-gray-700 dark:text-gray-100">
+        </div>
+        <div class="flex gap-4 mt-4">
+          <button onclick="saveEditedExpense()" class="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 flex-1">সেভ করুন</button>
+          <button onclick="closeEditModal()" class="bg-gray-500 text-white p-2 rounded hover:bg-gray-600 flex-1">বাতিল</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
     let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
     let filteredExpenses = [...expenses];
+    let editingIndex = null;
 
     // ডার্ক মোড টগল
     const themeToggle = document.getElementById('themeToggle');
     const themeIcon = document.getElementById('themeIcon');
 
-    // প্রাথমিক থিম সেট করা
     function setInitialTheme() {
       const savedTheme = localStorage.getItem('theme');
       if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -134,7 +161,6 @@
       }
     }
 
-    // থিম টগল করা
     themeToggle.addEventListener('click', () => {
       document.documentElement.classList.toggle('dark');
       const isDark = document.documentElement.classList.contains('dark');
@@ -142,7 +168,6 @@
       localStorage.setItem('theme', isDark ? 'dark' : 'light');
     });
 
-    // পেজ লোডে প্রাথমিক থিম সেট করা
     setInitialTheme();
 
     function addExpense() {
@@ -164,6 +189,42 @@
       renderExpenses();
       clearForm();
       generateMonthlyReport();
+    }
+
+    function editExpense(index) {
+      editingIndex = index;
+      const expense = expenses[index];
+      document.getElementById('editDate').value = expense.date;
+      document.getElementById('editDescription').value = expense.description;
+      document.getElementById('editAmount').value = expense.amount;
+      document.getElementById('editCategory').value = expense.category;
+      document.getElementById('editNotes').value = expense.notes;
+      document.getElementById('editModal').classList.remove('hidden');
+    }
+
+    function saveEditedExpense() {
+      const date = document.getElementById('editDate').value;
+      const description = document.getElementById('editDescription').value;
+      const amount = parseFloat(document.getElementById('editAmount').value);
+      const category = document.getElementById('editCategory').value;
+      const notes = document.getElementById('editNotes').value;
+
+      if (!date || !description || !amount) {
+        alert('তারিখ, বিবরণ এবং টাকার পরিমাণ পূরণ করুন!');
+        return;
+      }
+
+      expenses[editingIndex] = { date, description, amount, category, notes };
+      localStorage.setItem('expenses', JSON.stringify(expenses));
+      filteredExpenses = [...expenses];
+      renderExpenses();
+      generateMonthlyReport();
+      closeEditModal();
+    }
+
+    function closeEditModal() {
+      document.getElementById('editModal').classList.add('hidden');
+      editingIndex = null;
     }
 
     function deleteExpense(index) {
@@ -193,6 +254,7 @@
             <td class="p-2 border dark:border-gray-600">${expense.category}</td>
             <td class="p-2 border dark:border-gray-600">${expense.notes}</td>
             <td class="p-2 border dark:border-gray-600">
+              <button onclick="editExpense(${index})" class="text-blue-500 hover:underline mr-2">ইডিট</button>
               <button onclick="deleteExpense(${index})" class="text-red-500 hover:underline">মুছুন</button>
             </td>
           </tr>`;
@@ -206,7 +268,10 @@
             <p><strong>টাকা:</strong> ${expense.amount}</p>
             <p><strong>ক্যাটাগরি:</strong> ${expense.category}</p>
             <p><strong>মন্তব্য:</strong> ${expense.notes || '-'}</p>
-            <button onclick="deleteExpense(${index})" class="text-red-500 hover:underline mt-2">মুছুন</button>
+            <div class="mt-2 flex gap-2">
+              <button onclick="editExpense(${index})" class="text-blue-500 hover:underline">ইডিট</button>
+              <button onclick="deleteExpense(${index})" class="text-red-500 hover:underline">মুছুন</button>
+            </div>
           </div>`;
         cardContainer.innerHTML += card;
       });
