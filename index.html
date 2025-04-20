@@ -33,7 +33,7 @@
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-300">
   <div class="container mx-auto p-4 sm:p-6 max-w-4xl">
-    <!-- ডার্ক মোড টগল -->
+    <!-- Dark Mode Toggle -->
     <div class="flex justify-end mb-4">
       <button id="themeToggle" class="bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 p-2 rounded-full w-10 h-10 flex items-center justify-center">
         <span id="themeIcon">🌙</span>
@@ -42,7 +42,7 @@
 
     <h1 class="text-2xl sm:text-3xl font-bold text-center mb-6">প্রতিদিনের খরচ ট্র্যাকার</h1>
 
-    <!-- ফর্ম -->
+    <!-- Form -->
     <div class="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-md mb-6">
       <h2 class="text-lg sm:text-xl font-semibold mb-4">নতুন খরচ যোগ করুন</h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -61,7 +61,7 @@
       </div>
     </div>
 
-    <!-- ফিল্টার এবং এক্সপোর্ট -->
+    <!-- Filter and Export -->
     <div class="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-md mb-6">
       <h2 class="text-lg sm:text-xl font-semibold mb-4">খরচ ফিল্টার এবং রিপোর্ট</h2>
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
@@ -83,10 +83,10 @@
       </div>
     </div>
 
-    <!-- খরচের তালিকা -->
+    <!-- Expense list -->
     <div class="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-md mb-6">
       <h2 class="text-lg sm:text-xl font-semibold mb-4">খরচের তালিকা</h2>
-      <!-- ডেস্কটপ টেবিল -->
+      <!-- Desktop Table -->
       <div class="desktop-table overflow-x-auto">
         <table class="w-full text-left border-collapse">
           <thead>
@@ -102,12 +102,12 @@
           <tbody id="expenseTable"></tbody>
         </table>
       </div>
-      <!-- মোবাইল কার্ড -->
+      <!-- Phone Card -->
       <div class="mobile-cards space-y-4" id="expenseCards"></div>
       <p class="mt-4 text-lg font-semibold">মোট খরচ: <span id="totalAmount">0</span> টাকা</p>
     </div>
 
-    <!-- মাসিক রিপোর্ট -->
+    <!-- Monthly Report -->
     <div class="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-md">
       <h2 class="text-lg sm:text-xl font-semibold mb-4">মাসিক রিপোর্ট</h2>
       <div class="mb-4">
@@ -116,7 +116,7 @@
       <div id="monthlyReport" class="text-base sm:text-lg"></div>
     </div>
 
-    <!-- ইডিট মডাল -->
+    <!-- Edit Modal -->
     <div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
       <div class="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-md w-full max-w-lg">
         <h2 class="text-lg sm:text-xl font-semibold mb-4">খরচ ইডিট করুন</h2>
@@ -146,7 +146,7 @@
     let filteredExpenses = [...expenses];
     let editingIndex = null;
 
-    // ডার্ক মোড টগল
+    // Dark mode toggle
     const themeToggle = document.getElementById('themeToggle');
     const themeIcon = document.getElementById('themeIcon');
 
@@ -245,7 +245,7 @@
       filteredExpenses.forEach((expense, index) => {
         total += expense.amount;
 
-        // ডেস্কটপ টেবিল
+        // Desktop Table Row
         const row = `
           <tr>
             <td class="p-2 border dark:border-gray-600">${expense.date}</td>
@@ -260,7 +260,7 @@
           </tr>`;
         tableBody.innerHTML += row;
 
-        // মোবাইল কার্ড
+        // Phone Card
         const card = `
           <div class="expense-card bg-gray-50 dark:bg-gray-700 p-4 rounded-lg shadow">
             <p><strong>তারিখ:</strong> ${expense.date}</p>
@@ -369,7 +369,7 @@
       document.getElementById('monthlyReport').innerHTML = reportHTML;
     }
 
-    // পেজ লোড হলে খরচের তালিকা দেখান
+    // Show cost list when page loads
     renderExpenses();
     document.getElementById('reportMonth').addEventListener('change', generateMonthlyReport);
   </script>
